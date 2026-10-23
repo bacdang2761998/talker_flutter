@@ -20,6 +20,7 @@ class TalkerView extends StatefulWidget {
     this.customSettings = const [],
     this.isLogsExpanded = true,
     this.isLogOrderReversed = true,
+    this.grouper,
   }) : super(key: key);
 
   /// Talker implementation
@@ -55,6 +56,12 @@ class TalkerView extends StatefulWidget {
   /// {@endtemplate}
   final bool isLogOrderReversed;
 
+  /// {@template talker_flutter_grouper}
+  /// Groups logs into a single list item (e.g. request + response
+  /// of one HTTP call). null = no grouping, same as upstream
+  /// {@endtemplate}
+  final TalkerLogGrouper? grouper;
+
   @override
   State<TalkerView> createState() => _TalkerViewState();
 }
@@ -78,7 +85,7 @@ class _TalkerViewState extends State<TalkerView> {
           return TalkerBuilder(
             talker: widget.talker,
             builder: (context, data) {
-              final filteredElements = _getFilteredLogs(data);
+              final filteredElements = _getFilteredItems(data);
               final keys = data.map((e) => e.key).toList();
               final uniqKeys = keys.toSet().toList();
 
@@ -103,7 +110,11 @@ class _TalkerViewState extends State<TalkerView> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, i) {
-                        final data = _getListItem(filteredElements, i);
+                        final item = _getListItem(filteredElements, i);
+                        if (item.group != null) {
+                          return _buildGroup(context, item.group!);
+                        }
+                        final data = item.data!;
                         if (widget.itemsBuilder != null) {
                           return widget.itemsBuilder!.call(context, data);
                         }
@@ -116,6 +127,8 @@ class _TalkerViewState extends State<TalkerView> {
                         );
                       },
                       childCount: filteredElements.length,
+                      findChildIndexCallback: (key) =>
+                          _findItemIndex(filteredElements, key),
                     ),
                   ),
                 ],
@@ -130,14 +143,59 @@ class _TalkerViewState extends State<TalkerView> {
   List<TalkerData> _getFilteredLogs(List<TalkerData> data) =>
       data.where((e) => _controller.filter.filter(e)).toList();
 
+  List<TalkerLogItem> _getFilteredItems(List<TalkerData> data) =>
+      filterTalkerLogItems(
+          talkerLogItems(data, widget.grouper), _controller.filter);
+
+  /// Keeps a group card at its position (and state) when a new log
+  /// of the group arrives
+  int? _findItemIndex(List<TalkerLogItem> items, Key key) {
+    if (key is! ValueKey<String>) return null;
+    final index = items.indexWhere((e) => e.group?.key == key.value);
+    if (index < 0) return null;
+    return _controller.isLogOrderReversed ? items.length - 1 - index : index;
+  }
+
+  Widget _buildGroup(BuildContext context, TalkerLogGroup group) {
+    Widget? child;
+    try {
+      child = widget.grouper!.buildGroup(context, group, widget.theme);
+    } catch (e) {
+      debugPrint('TalkerLogGrouper.buildGroup failed: $e');
+      child = Column(
+        children: group.logs
+            .map((data) => TalkerDataCard(
+                  data: data,
+                  backgroundColor: widget.theme.cardColor,
+                  onCopyTap: () => _copyTalkerDataItemText(data),
+                  expanded: _controller.expandedLogs,
+                  color: data.getFlutterColor(widget.theme),
+                ))
+            .toList(),
+      );
+    }
+    return KeyedSubtree(
+      key: ValueKey<String>(group.key),
+      child: child ??
+          TalkerGroupCard(
+            group: group,
+            theme: widget.theme,
+            expanded: _controller.expandedLogs,
+            onCopyTap: () => _copyText(
+              talkerLogItemText(TalkerLogItem.group(group), widget.grouper),
+            ),
+          ),
+    );
+  }
+
   void _onToggleKey(String key, bool selected) {
     final action =
         selected ? _controller.addFilterKey : _controller.removeFilterKey;
     action(key);
   }
 
-  TalkerData _getListItem(
-    List<TalkerData> filteredElements,
+  TalkerLogItem _getListItem(
+    List<TalkerLogItem> filteredElements,
     int i,
   ) {
     final data = filteredElements[
@@ -176,8 +234,23 @@ class _TalkerViewState extends State<TalkerView> {
   void _copyTalkerDataItemText(TalkerData data) {
     final text =
         data.generateTextMessage(timeFormat: widget.talker.settings.timeFormat);
+    _copyText(text);
+  }
+
+  void _copyText(String text) {
     Clipboard.setData(ClipboardData(text: text));
     _showSnackBar(context, 'Log item is copied in clipboard');
+  }
+
+  /// Text of [logs] for copy/share; one block per group when grouping
+  String _logsText(List<TalkerData> logs) {
+    final timeFormat = widget.talker.settings.timeFormat;
+    if (widget.grouper == null) return logs.text(timeFormat: timeFormat);
+    return talkerLogItemsText(
+      groupTalkerLogs(logs, widget.grouper!),
+      widget.grouper,
+      timeFormat: timeFormat,
+    );
   }
 
   void _showSnackBar(BuildContext context, String text) {
@@ -234,9 +307,7 @@ class _TalkerViewState extends State<TalkerView> {
   }
 
   Future<void> _shareLogsInFile() async {
-    await _controller.downloadLogsFile(
-      widget.talker.history.text(timeFormat: widget.talker.settings.timeFormat),
-    );
+    await _controller.downloadLogsFile(_logsText(widget.talker.history));
   }
 
   void _cleanHistory() {
@@ -249,16 +320,17 @@ class _TalkerViewState extends State<TalkerView> {
   }
 
   void _copyAllLogs(BuildContext context) {
-    Clipboard.setData(ClipboardData(
-        text: widget.talker.history
-            .text(timeFormat: widget.talker.settings.timeFormat)));
+    Clipboard.setData(ClipboardData(text: _logsText(widget.talker.history)));
     _showSnackBar(context, 'All logs copied in buffer');
   }
 
   void _copyFilteredLogs(BuildContext context) {
-    Clipboard.setData(ClipboardData(
-        text: _getFilteredLogs(widget.talker.history)
-            .text(timeFormat: widget.talker.settings.timeFormat)));
+    final text = widget.grouper == null
+        ? _logsText(_getFilteredLogs(widget.talker.history))
+        : talkerLogItemsText(
+            _getFilteredItems(widget.talker.history), widget.grouper,
+            timeFormat: widget.talker.settings.timeFormat);
+    Clipboard.setData(ClipboardData(text: text));
     _showSnackBar(context, 'All filtered logs copied in buffer');
   }
 }

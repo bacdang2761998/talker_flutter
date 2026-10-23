@@ -73,6 +73,12 @@ class TalkerDioLogger extends Interceptor {
       options.extra[kDioLogsTimeStampKey] =
           DateTime.now().millisecondsSinceEpoch;
     }
+    // Assigned before requestFilter, so the response still carries the id
+    // when the request log is filtered out
+    String? requestId;
+    if (settings.enabled) {
+      requestId = TalkerDioRequestId.assign(options, settings);
+    }
 
     super.onRequest(options, handler);
     if (!settings.enabled) {
@@ -88,6 +94,7 @@ class TalkerDioLogger extends Interceptor {
         message,
         requestOptions: options,
         settings: settings,
+        requestId: requestId,
       );
       _talker.logCustom(httpLog);
     } catch (_) {

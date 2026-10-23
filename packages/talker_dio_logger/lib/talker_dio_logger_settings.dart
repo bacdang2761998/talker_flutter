@@ -26,6 +26,11 @@ class TalkerDioLoggerSettings {
     this.requestFilter,
     this.responseFilter,
     this.errorFilter,
+    this.requestIdKey = 'talker-request-id',
+    this.requestIdBuilder,
+    this.sendRequestIdHeader = false,
+    this.requestIdHeaderName = 'X-Request-Id',
+    this.printRequestId = false,
   });
 
   // Print Dio logger if true
@@ -125,6 +130,26 @@ class TalkerDioLoggerSettings {
   /// Case insensitive
   final Set<String> hiddenHeaders;
 
+  /// Key in [RequestOptions.extra] holding the id of each sent request.
+  /// The id links request, response and error logs of one call.
+  final String requestIdKey;
+
+  /// Custom request id. Must return a different value for every send,
+  /// otherwise retries of the same call are grouped together.
+  /// Default format: `<microsecondsSinceEpoch>-<counter>`
+  final String Function(RequestOptions requestOptions)? requestIdBuilder;
+
+  /// Send the request id to the server in [requestIdHeaderName] header.
+  /// Disabled by default: a new header can break signed requests
+  /// and triggers CORS preflight on web.
+  final bool sendRequestIdHeader;
+
+  /// Header name used when [sendRequestIdHeader] is true
+  final String requestIdHeaderName;
+
+  /// Print the request id in the title line of console logs
+  final bool printRequestId;
+
   TalkerDioLoggerSettings copyWith({
     bool? printResponseData,
     bool? printResponseHeaders,
@@ -146,6 +171,11 @@ class TalkerDioLoggerSettings {
     bool Function(DioException response)? errorFilter,
     Set<String>? hiddenHeaders,
     LogLevel? logLevel,
+    String? requestIdKey,
+    String Function(RequestOptions requestOptions)? requestIdBuilder,
+    bool? sendRequestIdHeader,
+    String? requestIdHeaderName,
+    bool? printRequestId,
   }) {
     return TalkerDioLoggerSettings(
       printResponseData: printResponseData ?? this.printResponseData,
@@ -169,6 +199,11 @@ class TalkerDioLoggerSettings {
       errorFilter: errorFilter ?? this.errorFilter,
       hiddenHeaders: hiddenHeaders ?? this.hiddenHeaders,
       logLevel: logLevel ?? this.logLevel,
+      requestIdKey: requestIdKey ?? this.requestIdKey,
+      requestIdBuilder: requestIdBuilder ?? this.requestIdBuilder,
+      sendRequestIdHeader: sendRequestIdHeader ?? this.sendRequestIdHeader,
+      requestIdHeaderName: requestIdHeaderName ?? this.requestIdHeaderName,
+      printRequestId: printRequestId ?? this.printRequestId,
     );
   }
 }

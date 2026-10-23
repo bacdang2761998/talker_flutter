@@ -9,10 +9,16 @@ class DioRequestLog extends TalkerLog {
     String message, {
     required this.requestOptions,
     required this.settings,
-  }) : super(message);
+    String? requestId,
+  })  : requestId =
+            requestId ?? TalkerDioRequestId.read(requestOptions, settings),
+        super(message);
 
   final RequestOptions requestOptions;
   final TalkerDioLoggerSettings settings;
+
+  /// Id of the sent request, captured when the log is created
+  final String? requestId;
 
   String Function(dynamic) get _format => settings.jsonFormatter.format;
 
@@ -29,7 +35,8 @@ class DioRequestLog extends TalkerLog {
   String generateTextMessage({
     TimeFormat timeFormat = TimeFormat.timeAndSeconds,
   }) {
-    var msg = '[$title] [${requestOptions.method}] $message';
+    var msg = '[$title] [${requestOptions.method}]'
+        '${_requestIdLabel(settings, requestId)} $message';
 
     final data = requestOptions.data;
     final headers = Map.from(requestOptions.headers);
@@ -62,7 +69,8 @@ class DioRequestLog extends TalkerLog {
         msg += '\nHeaders: ${_format(headers)}';
       }
 
-      final extra = Map.from(requestOptions.extra);
+      final extra = Map.from(requestOptions.extra)
+        ..remove(settings.requestIdKey);
       if (settings.printRequestExtra && extra.isNotEmpty) {
         msg += '\nExtra: ${_format(extra)}';
       }
@@ -94,11 +102,17 @@ class DioResponseLog extends TalkerLog {
     String message, {
     required this.response,
     required this.settings,
+    String? requestId,
   })  : responseTime = _getResponseTime(response.requestOptions),
+        requestId = requestId ??
+            TalkerDioRequestId.read(response.requestOptions, settings),
         super(message);
 
   final Response<dynamic> response;
   final TalkerDioLoggerSettings settings;
+
+  /// Id of the sent request, captured when the log is created
+  final String? requestId;
 
   /// Response time in milliseconds, calculated once when the log is created
   final int? responseTime;
@@ -118,7 +132,8 @@ class DioResponseLog extends TalkerLog {
   String generateTextMessage({
     TimeFormat timeFormat = TimeFormat.timeAndSeconds,
   }) {
-    var msg = '[$title] [${response.requestOptions.method}] $message';
+    var msg = '[$title] [${response.requestOptions.method}]'
+        '${_requestIdLabel(settings, requestId)} $message';
 
     final responseMessage = response.statusMessage;
     final data = response.data;
@@ -165,11 +180,17 @@ class DioErrorLog extends TalkerLog {
     String title, {
     required this.dioException,
     required this.settings,
+    String? requestId,
   })  : responseTime = _getResponseTime(dioException.requestOptions),
+        requestId = requestId ??
+            TalkerDioRequestId.read(dioException.requestOptions, settings),
         super(title);
 
   final DioException dioException;
   final TalkerDioLoggerSettings settings;
+
+  /// Id of the sent request, captured when the log is created
+  final String? requestId;
 
   /// Response time in milliseconds, calculated once when the log is created
   final int? responseTime;
@@ -189,7 +210,8 @@ class DioErrorLog extends TalkerLog {
   String generateTextMessage({
     TimeFormat timeFormat = TimeFormat.timeAndSeconds,
   }) {
-    var msg = '[$title] [${dioException.requestOptions.method}] $message';
+    var msg = '[$title] [${dioException.requestOptions.method}]'
+        '${_requestIdLabel(settings, requestId)} $message';
 
     final responseMessage = dioException.message;
     final statusCode = dioException.response?.statusCode;
@@ -218,6 +240,11 @@ class DioErrorLog extends TalkerLog {
     }
     return msg;
   }
+}
+
+String _requestIdLabel(TalkerDioLoggerSettings settings, String? requestId) {
+  if (!settings.printRequestId || requestId == null) return '';
+  return ' [#$requestId]';
 }
 
 ///

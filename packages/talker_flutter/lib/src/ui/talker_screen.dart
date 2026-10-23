@@ -13,6 +13,7 @@ class TalkerScreen extends StatelessWidget {
     this.customSettings = const [],
     this.isLogsExpanded = true,
     this.isLogOrderReversed = true,
+    this.grouper,
   }) : super(key: key);
 
   /// Talker implementation
@@ -40,6 +41,9 @@ class TalkerScreen extends StatelessWidget {
   ///{@macro talker_flutter_is_log_order_reversed}
   final bool isLogOrderReversed;
 
+  ///{@macro talker_flutter_grouper}
+  final TalkerLogGrouper? grouper;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +57,7 @@ class TalkerScreen extends StatelessWidget {
         customSettings: customSettings,
         isLogsExpanded: isLogsExpanded,
         isLogOrderReversed: isLogOrderReversed,
+        grouper: grouper,
       ),
     );
   }
