@@ -22,6 +22,7 @@ class TalkerView extends StatefulWidget {
     this.isLogOrderReversed = true,
     this.grouper,
     this.canShareLogsFile = true,
+    this.filterKeys = const [],
   }) : super(key: key);
 
   /// Talker implementation
@@ -69,6 +70,12 @@ class TalkerView extends StatefulWidget {
   /// {@endtemplate}
   final bool canShareLogsFile;
 
+  /// {@template talker_flutter_filter_keys}
+  /// Filter chips always shown, in this order and even with a count of 0,
+  /// before the other keys found in the logs. Empty = same as upstream
+  /// {@endtemplate}
+  final List<String> filterKeys;
+
   @override
   State<TalkerView> createState() => _TalkerViewState();
 }
@@ -97,7 +104,10 @@ class _TalkerViewState extends State<TalkerView> {
                   filterTalkerLogItems(items, _controller.filter);
               // Counts follow the key filter: one per item, by its last log
               final keys = talkerLogItemKeys(items);
-              final uniqKeys = data.map((e) => e.key).toSet().toList();
+              final uniqKeys = <String?>{
+                ...widget.filterKeys,
+                ...data.map((e) => e.key),
+              }.toList();
 
               return CustomScrollView(
                 controller: widget.scrollController,

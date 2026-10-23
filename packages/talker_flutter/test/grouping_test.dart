@@ -247,6 +247,25 @@ void main() {
       expect(find.byType(TalkerGroupCard), findsOneWidget);
     });
 
+    testWidgets('filterKeys: chips always shown in order, count 0 allowed',
+        (tester) async {
+      talker.logCustom(TalkerLog('#1 req', key: 'http-request'));
+      talker.logCustom(TalkerLog('plain'));
+      await tester.pumpWidget(MaterialApp(
+        home: TalkerScreen(
+          talker: talker,
+          grouper: const _IdGrouper(),
+          filterKeys: const ['http-response', 'app-log'],
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      double x(String key) => tester.getTopLeft(find.text(key)).dx;
+      expect(find.text('app-log'), findsOneWidget);
+      expect(x('http-response'), lessThan(x('app-log')));
+      expect(x('app-log'), lessThan(x('http-request')));
+    });
+
     testWidgets('new log of a group updates the same card in place',
         (tester) async {
       talker.logCustom(TalkerLog('#1 req', key: 'http-request'));
