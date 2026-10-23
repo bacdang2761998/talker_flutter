@@ -56,17 +56,22 @@ class _ActionTile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ListTile(
-          onTap: () => _onTap(context),
-          title: Text(
-            action.title,
-            style: TextStyle(
-              color: talkerScreenTheme.textColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
+        // Material riêng: ListTile vẽ ink lên Material gần nhất, nằm dưới
+        // Container có màu nền của sheet (Flutter mới assert trường hợp này).
+        Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            onTap: () => _onTap(context),
+            title: Text(
+              action.title,
+              style: TextStyle(
+                color: talkerScreenTheme.textColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
             ),
+            leading: Icon(action.icon, color: talkerScreenTheme.textColor),
           ),
-          leading: Icon(action.icon, color: talkerScreenTheme.textColor),
         ),
         if (showDivider)
           Divider(
