@@ -66,10 +66,9 @@ class _TalkerSettingsBottomSheetState extends State<TalkerSettingsBottomSheet> {
         title: 'Use console logs',
         enabled: talker.settings.useConsoleLogs,
         onChanged: (enabled) {
-          talker.configure(
-            settings: talker.settings.copyWith(
-              useConsoleLogs: enabled,
-            ),
+          _configureSettings(
+            talker,
+            talker.settings.copyWith(useConsoleLogs: enabled),
           );
           widget.talker.notifyListeners();
         },
@@ -80,10 +79,9 @@ class _TalkerSettingsBottomSheetState extends State<TalkerSettingsBottomSheet> {
         title: 'Use history',
         enabled: talker.settings.useHistory,
         onChanged: (enabled) {
-          talker.configure(
-            settings: talker.settings.copyWith(
-              useHistory: enabled,
-            ),
+          _configureSettings(
+            talker,
+            talker.settings.copyWith(useHistory: enabled),
           );
           widget.talker.notifyListeners();
         },
@@ -229,6 +227,13 @@ class _TalkerSettingsBottomSheetState extends State<TalkerSettingsBottomSheet> {
         ],
       ),
     );
+  }
+
+  /// `TalkerSettings.copyWith` (talker core) tạo object mới mà không mang theo
+  /// `registeredKeys`, nên mục "Packages settings" biến mất sau khi bật/tắt.
+  void _configureSettings(Talker talker, TalkerSettings settings) {
+    settings.registerKeys(talker.settings.registeredKeys);
+    talker.configure(settings: settings);
   }
 
   void _toggleKeySelected(bool enabled, String e) {
