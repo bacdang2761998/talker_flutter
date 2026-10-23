@@ -10,7 +10,8 @@ Future<void> downloadFile(String logs) async {
   final file =
       await File('$dirPath/talker_logs_$fmtDate.txt').create(recursive: true);
   await file.writeAsString(logs);
-  await SharePlus.instance.share(
-    ShareParams(files: <XFile>[XFile(file.path)]),
-  );
+  // vmap: API `Share` cũ có ở mọi bản share_plus 10–13, để app giữ được
+  // share_plus 10 (SharePlus.instance chỉ có từ 11).
+  // ignore: deprecated_member_use
+  await Share.shareXFiles(<XFile>[XFile(file.path)]);
 }
