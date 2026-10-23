@@ -85,9 +85,12 @@ class _TalkerViewState extends State<TalkerView> {
           return TalkerBuilder(
             talker: widget.talker,
             builder: (context, data) {
-              final filteredElements = _getFilteredItems(data);
-              final keys = data.map((e) => e.key).toList();
-              final uniqKeys = keys.toSet().toList();
+              final items = talkerLogItems(data, widget.grouper);
+              final filteredElements =
+                  filterTalkerLogItems(items, _controller.filter);
+              // Counts follow the key filter: one per item, by its last log
+              final keys = talkerLogItemKeys(items);
+              final uniqKeys = data.map((e) => e.key).toSet().toList();
 
               return CustomScrollView(
                 controller: widget.scrollController,

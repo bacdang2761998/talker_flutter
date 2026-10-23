@@ -158,6 +158,10 @@ void main() {
       expect(res.single.data!.message, 'plain info');
     });
 
+    test('item keys count a group once, by its last log', () {
+      expect(talkerLogItemKeys(items), ['http-response', 'http-error', 'info']);
+    });
+
     test('search matches text of any group log', () {
       final res = filterTalkerLogItems(
         items,
@@ -216,6 +220,31 @@ void main() {
       await pump(tester, const _IdGrouper());
       expect(find.byType(TalkerGroupCard), findsOneWidget);
       expect(find.byType(TalkerDataCard), findsNothing);
+    });
+
+    testWidgets('chip count matches what the chip filter shows',
+        (tester) async {
+      for (final id in ['1', '2', '3']) {
+        talker.logCustom(TalkerLog('#$id req', key: 'http-request'));
+        talker.logCustom(TalkerLog('#$id res', key: 'http-response'));
+      }
+      talker.logCustom(TalkerLog('#4 req', key: 'http-request'));
+      await pump(tester, const _IdGrouper());
+
+      Finder chip(String key) => find.ancestor(
+            of: find.text(key),
+            matching: find.byType(Row),
+          );
+      String count(String key) => tester
+          .widget<Text>(
+              find.descendant(of: chip(key), matching: find.byType(Text)).first)
+          .data!;
+      expect(count('http-request'), '1');
+      expect(count('http-response'), '3');
+
+      await tester.tap(find.text('http-request'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TalkerGroupCard), findsOneWidget);
     });
 
     testWidgets('new log of a group updates the same card in place',

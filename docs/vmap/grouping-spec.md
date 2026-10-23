@@ -126,7 +126,7 @@ F3. Nhóm một phần tử. Nhóm chỉ có 1 log vẫn hiển thị bằng bui
 
 F4. Cập nhật tại chỗ. Khi có log mới thuộc một nhóm đã tồn tại (ví dụ response vừa về), item của nhóm đó rebuild tại vị trí cũ, không nhảy vị trí và không làm mất vị trí cuộn.
 
-F5. Filter theo loại log. Nhóm được lọc theo trạng thái hiện tại: key xét trên log CUỐI của nhóm, search xét trên mọi log con; nhóm được giữ thì hiển thị cả nhóm. Với HTTP: "http-request" = call đang chờ (chưa có response), "http-response" = call đã có response, "http-error" = call lỗi, mỗi call kèm request của nó. Log đơn lọc như upstream. (Đổi 2026-10-23: bản đầu giữ nhóm khi có 1 log con bất kỳ khớp, làm "http-request"/"http-response" gần như không lọc gì.)
+F5. Filter theo loại log. Nhóm được lọc theo trạng thái hiện tại: key xét trên log CUỐI của nhóm, search xét trên mọi log con; nhóm được giữ thì hiển thị cả nhóm. Với HTTP: "http-request" = call đang chờ (chưa có response), "http-response" = call đã có response, "http-error" = call lỗi, mỗi call kèm request của nó. Log đơn lọc như upstream. Số đếm trên mỗi chip theo cùng quy tắc: mỗi nhóm đếm một lần theo key của log cuối, nên số đếm luôn bằng số item hiện ra khi chọn chip đó. (Đổi 2026-10-23: bản đầu giữ nhóm khi có 1 log con bất kỳ khớp, làm "http-request"/"http-response" gần như không lọc gì.)
 
 F6. Search. Áp dụng cùng quy tắc với F5, so khớp trên text của từng log con.
 

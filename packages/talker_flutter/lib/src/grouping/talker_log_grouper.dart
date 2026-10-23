@@ -112,6 +112,11 @@ List<TalkerLogItem> filterTalkerLogItems(
   }).toList();
 }
 
+/// Key of each item as the key filter sees it: a group counts once, by its
+/// last log; a single log by its own key
+List<String?> talkerLogItemKeys(List<TalkerLogItem> items) =>
+    [for (final item in items) item.group?.last.key ?? item.data!.key];
+
 /// Text of one item for copy/share
 String talkerLogItemText(
   TalkerLogItem item,
