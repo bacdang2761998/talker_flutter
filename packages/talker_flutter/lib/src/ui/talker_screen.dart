@@ -16,6 +16,7 @@ class TalkerScreen extends StatelessWidget {
     this.grouper,
     this.canShareLogsFile = true,
     this.filterKeys = const [],
+    this.hiddenFilterKeys = const [],
   }) : super(key: key);
 
   /// Talker implementation
@@ -52,6 +53,9 @@ class TalkerScreen extends StatelessWidget {
   ///{@macro talker_flutter_filter_keys}
   final List<String> filterKeys;
 
+  ///{@macro talker_flutter_hidden_filter_keys}
+  final List<String> hiddenFilterKeys;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,6 +72,7 @@ class TalkerScreen extends StatelessWidget {
         grouper: grouper,
         canShareLogsFile: canShareLogsFile,
         filterKeys: filterKeys,
+        hiddenFilterKeys: hiddenFilterKeys,
       ),
     );
   }

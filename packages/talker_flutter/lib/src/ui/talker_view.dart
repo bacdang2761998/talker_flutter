@@ -23,6 +23,7 @@ class TalkerView extends StatefulWidget {
     this.grouper,
     this.canShareLogsFile = true,
     this.filterKeys = const [],
+    this.hiddenFilterKeys = const [],
   }) : super(key: key);
 
   /// Talker implementation
@@ -76,6 +77,11 @@ class TalkerView extends StatefulWidget {
   /// {@endtemplate}
   final List<String> filterKeys;
 
+  /// {@template talker_flutter_hidden_filter_keys}
+  /// Keys that never get a filter chip, even when found in the logs
+  /// {@endtemplate}
+  final List<String> hiddenFilterKeys;
+
   @override
   State<TalkerView> createState() => _TalkerViewState();
 }
@@ -107,7 +113,7 @@ class _TalkerViewState extends State<TalkerView> {
               final uniqKeys = <String?>{
                 ...widget.filterKeys,
                 ...data.map((e) => e.key),
-              }.toList();
+              }.where((e) => !widget.hiddenFilterKeys.contains(e)).toList();
 
               return CustomScrollView(
                 controller: widget.scrollController,

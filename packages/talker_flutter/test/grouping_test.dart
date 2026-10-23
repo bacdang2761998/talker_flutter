@@ -266,6 +266,22 @@ void main() {
       expect(x('app-log'), lessThan(x('http-request')));
     });
 
+    testWidgets('hiddenFilterKeys: no chip even when the key is in the logs',
+        (tester) async {
+      talker.logCustom(TalkerLog('#1 req', key: 'http-request'));
+      talker.logCustom(TalkerLog('#1 res', key: 'http-response'));
+      await tester.pumpWidget(MaterialApp(
+        home: TalkerScreen(
+          talker: talker,
+          grouper: const _IdGrouper(),
+          hiddenFilterKeys: const ['http-request'],
+        ),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('http-request'), findsNothing);
+      expect(find.text('http-response'), findsOneWidget);
+    });
+
     testWidgets('new log of a group updates the same card in place',
         (tester) async {
       talker.logCustom(TalkerLog('#1 req', key: 'http-request'));
