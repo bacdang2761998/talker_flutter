@@ -14,6 +14,7 @@ class TalkerScreen extends StatelessWidget {
     this.isLogsExpanded = true,
     this.isLogOrderReversed = true,
     this.grouper,
+    this.canShareLogsFile = true,
   }) : super(key: key);
 
   /// Talker implementation
@@ -44,6 +45,9 @@ class TalkerScreen extends StatelessWidget {
   ///{@macro talker_flutter_grouper}
   final TalkerLogGrouper? grouper;
 
+  ///{@macro talker_flutter_can_share_logs_file}
+  final bool canShareLogsFile;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +62,7 @@ class TalkerScreen extends StatelessWidget {
         isLogsExpanded: isLogsExpanded,
         isLogOrderReversed: isLogOrderReversed,
         grouper: grouper,
+        canShareLogsFile: canShareLogsFile,
       ),
     );
   }

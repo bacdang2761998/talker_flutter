@@ -26,6 +26,7 @@ Phía app (A1–A10: `DioGrouper`, card HTTP, màn chi tiết, mask) **không** 
 - Retry luôn sinh id mới; không có chế độ "giữ id cũ" (D3).
 - Share/copy giữ thứ tự thời gian như upstream; nhóm nằm ở vị trí log đầu tiên.
 - `share_plus` nới về `>=10.1.4 <14` và dùng API `Share.shareXFiles` cũ (có ở 10–13), để app giữ được share_plus 10; bản 13.1+ kéo `win32` 6 xung đột `package_info_plus` 9.
+- `TalkerScreen(canShareLogsFile: false)` ẩn "Share logs file" (app vmap ẩn để log không rời máy); mặc định như upstream.
 - Filter key của nhóm xét trên log CUỐI (trạng thái hiện tại của call), search xét mọi log con (F5).
 - `groupKeyOf` / `buildGroup` / `groupText` throw → log hiển thị như log đơn, `debugPrint` lỗi.
 

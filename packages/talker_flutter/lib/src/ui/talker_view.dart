@@ -21,6 +21,7 @@ class TalkerView extends StatefulWidget {
     this.isLogsExpanded = true,
     this.isLogOrderReversed = true,
     this.grouper,
+    this.canShareLogsFile = true,
   }) : super(key: key);
 
   /// Talker implementation
@@ -61,6 +62,12 @@ class TalkerView extends StatefulWidget {
   /// of one HTTP call). null = no grouping, same as upstream
   /// {@endtemplate}
   final TalkerLogGrouper? grouper;
+
+  /// {@template talker_flutter_can_share_logs_file}
+  /// false = hide the "Share logs file" action (logs never leave the device
+  /// as a file). true = same as upstream
+  /// {@endtemplate}
+  final bool canShareLogsFile;
 
   @override
   State<TalkerView> createState() => _TalkerViewState();
@@ -297,11 +304,12 @@ class _TalkerViewState extends State<TalkerView> {
               title: 'Clean history',
               icon: Icons.delete_outline,
             ),
-            TalkerActionItem(
-              onTap: _shareLogsInFile,
-              title: 'Share logs file',
-              icon: Icons.ios_share_outlined,
-            ),
+            if (widget.canShareLogsFile)
+              TalkerActionItem(
+                onTap: _shareLogsInFile,
+                title: 'Share logs file',
+                icon: Icons.ios_share_outlined,
+              ),
           ],
           talkerScreenTheme: widget.theme,
         );
