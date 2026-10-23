@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:group_button/group_button.dart';
 import 'package:talker_flutter/src/controller/controller.dart';
@@ -48,7 +50,9 @@ class _TalkerViewAppBarState extends State<TalkerViewAppBar>
 
   double? _spaceBarHeight;
 
-  final double _defaultSpaceBarHeight = 50;
+  /// Toolbar + key chips + search field before they are measured;
+  /// the bar never shrinks below it, so it never overflows meanwhile
+  final double _defaultSpaceBarHeight = 160;
 
   final double _defaultToolbarHeight = 60;
 
@@ -75,6 +79,14 @@ class _TalkerViewAppBarState extends State<TalkerViewAppBar>
 
   void _addPostFrameCallback(Duration timestamp) => _calculateHeight();
 
+  @override
+  void didUpdateWidget(covariant TalkerViewAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.uniqKeys.length != widget.uniqKeys.length) {
+      WidgetsBinding.instance.addPostFrameCallback(_addPostFrameCallback);
+    }
+  }
+
   void _calculateHeight() {
     final groupBtnRenderBox =
         _groupButtonKey.currentContext?.findRenderObject() as RenderBox?;
@@ -82,14 +94,17 @@ class _TalkerViewAppBarState extends State<TalkerViewAppBar>
 
     final searchFieldRenderBox =
         _searchTextFieldKey.currentContext?.findRenderObject() as RenderBox?;
-    if (searchFieldRenderBox == null) return;
+    if (searchFieldRenderBox == null || !mounted) return;
 
-    setState(() {
-      _spaceBarHeight = searchFieldRenderBox.size.height +
+    final height = max(
+      _defaultSpaceBarHeight,
+      searchFieldRenderBox.size.height +
           groupBtnRenderBox.size.height +
           _defaultToolbarHeight +
-          _padding;
-    });
+          _padding,
+    );
+    if (height == _spaceBarHeight) return;
+    setState(() => _spaceBarHeight = height);
   }
 
   @override
