@@ -25,6 +25,7 @@ Phía app (A1–A10: `DioGrouper`, card HTTP, màn chi tiết, mask) **không** 
 - Id không in trong "Extra" của console (để không vỡ test upstream); xem id qua `printRequestId`.
 - Retry luôn sinh id mới; không có chế độ "giữ id cũ" (D3).
 - Share/copy giữ thứ tự thời gian như upstream; nhóm nằm ở vị trí log đầu tiên.
+- Filter key của nhóm xét trên log CUỐI (trạng thái hiện tại của call), search xét mọi log con (F5).
 - `groupKeyOf` / `buildGroup` / `groupText` throw → log hiển thị như log đơn, `debugPrint` lỗi.
 
 ## Kiểm tra

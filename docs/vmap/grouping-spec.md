@@ -126,7 +126,7 @@ F3. Nhóm một phần tử. Nhóm chỉ có 1 log vẫn hiển thị bằng bui
 
 F4. Cập nhật tại chỗ. Khi có log mới thuộc một nhóm đã tồn tại (ví dụ response vừa về), item của nhóm đó rebuild tại vị trí cũ, không nhảy vị trí và không làm mất vị trí cuộn.
 
-F5. Filter theo loại log. Một nhóm được giữ lại nếu có ít nhất 1 log con khớp filter, và khi đó hiển thị cả nhóm. Ví dụ: lọc "http-error" sẽ ra các call lỗi kèm request của chúng.
+F5. Filter theo loại log. Nhóm được lọc theo trạng thái hiện tại: key xét trên log CUỐI của nhóm, search xét trên mọi log con; nhóm được giữ thì hiển thị cả nhóm. Với HTTP: "http-request" = call đang chờ (chưa có response), "http-response" = call đã có response, "http-error" = call lỗi, mỗi call kèm request của nó. Log đơn lọc như upstream. (Đổi 2026-10-23: bản đầu giữ nhóm khi có 1 log con bất kỳ khớp, làm "http-request"/"http-response" gần như không lọc gì.)
 
 F6. Search. Áp dụng cùng quy tắc với F5, so khớp trên text của từng log con.
 
@@ -345,7 +345,7 @@ Truyền requestIdBuilder: tab Request và text share hiển thị đúng id do 
 Bật sendRequestIdHeader: header có trên request khi xem qua proxy. Khi tắt, request không có header này (D5).
 
 
-Filter "http-error": chỉ hiện các call lỗi, mỗi call kèm đủ request. Search theo path: tìm đúng call.
+Filter "http-error": chỉ hiện các call lỗi, mỗi call kèm đủ request. Filter "http-request": chỉ call đang chờ; "http-response": chỉ call đã có response. Search theo path: tìm đúng call.
 
 
 Share log: mỗi call là 1 khối text liền nhau, không chứa token, OTP, PIN hay số giấy tờ.

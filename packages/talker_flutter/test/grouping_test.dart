@@ -115,6 +115,49 @@ void main() {
           ['http-request', 'http-error']);
     });
 
+    test('key filter checks the last log: request = pending only', () {
+      final pending = groupTalkerLogs(
+        [...logs, _log('#3 /slow', key: 'http-request')],
+        const _IdGrouper(),
+      );
+      final res = filterTalkerLogItems(
+        pending,
+        TalkerFilter(enabledKeys: ['http-request']),
+      );
+      expect(res.map((e) => e.group!.key), ['3']);
+    });
+
+    test('key filter checks the last log: response = done calls', () {
+      final res = filterTalkerLogItems(
+        items,
+        TalkerFilter(enabledKeys: ['http-response']),
+      );
+      expect(res.map((e) => e.group!.key), ['1']);
+    });
+
+    test('search + key: search any log, key on the last log', () {
+      final res = filterTalkerLogItems(
+        items,
+        TalkerFilter(enabledKeys: ['http-error'], searchQuery: '/orders'),
+      );
+      expect(res.single.group!.key, '2');
+      expect(
+        filterTalkerLogItems(
+          items,
+          TalkerFilter(enabledKeys: ['http-error'], searchQuery: '/users'),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('single logs keep the plain filter', () {
+      final res = filterTalkerLogItems(
+        items,
+        TalkerFilter(enabledKeys: ['info']),
+      );
+      expect(res.single.data!.message, 'plain info');
+    });
+
     test('search matches text of any group log', () {
       final res = filterTalkerLogItems(
         items,
@@ -190,7 +233,8 @@ void main() {
       expect(tester.getTopLeft(find.byType(TalkerGroupCard).last), before);
       expect(tester.state(find.byType(TalkerGroupCard).last), same(state));
       expect(
-        tester.widget<TalkerGroupCard>(find.byType(TalkerGroupCard).last)
+        tester
+            .widget<TalkerGroupCard>(find.byType(TalkerGroupCard).last)
             .group
             .logs,
         hasLength(2),
@@ -241,8 +285,7 @@ void main() {
           ),
         ));
 
-    testWidgets('shows first title, count, and last log color',
-        (tester) async {
+    testWidgets('shows first title, count, and last log color', (tester) async {
       await pump(tester, expanded: true);
       expect(find.textContaining('http-request |'), findsWidgets);
       expect(find.text('2'), findsOneWidget);
@@ -253,8 +296,8 @@ void main() {
           .map((c) => c.decoration)
           .whereType<BoxDecoration>()
           .firstWhere((d) => d.border != null);
-      expect((box.border! as Border).top.color,
-          group.last.getFlutterColor(theme));
+      expect(
+          (box.border! as Border).top.color, group.last.getFlutterColor(theme));
     });
 
     testWidgets('collapsed hides log rows, tap expands', (tester) async {

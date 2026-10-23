@@ -92,13 +92,25 @@ List<TalkerLogItem> talkerLogItems(
   return groupTalkerLogs(history, grouper);
 }
 
-/// A group is kept when at least one of its logs matches [filter],
-/// and is then shown whole
+/// A group is filtered by its current state: keys are checked on its LAST
+/// log (e.g. request only = pending, response = done, error = failed), the
+/// search query on any of its logs. A kept group is shown whole.
+/// Single logs use [filter] as is.
 List<TalkerLogItem> filterTalkerLogItems(
   List<TalkerLogItem> items,
   TalkerFilter filter,
-) =>
-    items.where((item) => item.logs.any(filter.filter)).toList();
+) {
+  final byKey = TalkerFilter(
+    enabledKeys: filter.enabledKeys,
+    disabledKeys: filter.disabledKeys,
+  );
+  final bySearch = TalkerFilter(searchQuery: filter.searchQuery);
+  return items.where((item) {
+    final group = item.group;
+    if (group == null) return filter.filter(item.data!);
+    return byKey.filter(group.last) && group.logs.any(bySearch.filter);
+  }).toList();
+}
 
 /// Text of one item for copy/share
 String talkerLogItemText(
