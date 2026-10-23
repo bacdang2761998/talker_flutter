@@ -29,6 +29,7 @@ Phía app (A1–A10: `DioGrouper`, card HTTP, màn chi tiết, mask) **không** 
 - `TalkerScreen(canShareLogsFile: false)` ẩn "Share logs file" (app vmap ẩn để log không rời máy); mặc định như upstream.
 - `filterKeys`: chip luôn hiện theo thứ tự đó (kể cả đếm 0), trước các key khác có trong log.
 - `hiddenFilterKeys`: key không bao giờ có chip, kể cả khi có trong log.
+- `TalkerConsoleCapture` (`lib/src/console/`): Zone bắt `print`/`debugPrint` vào Talker khi `useConsoleLogs` bật, che bằng `TalkerConsoleMask` (theo mẫu); app vmap dùng key `app-log`.
 - Filter key của nhóm xét trên log CUỐI (trạng thái hiện tại của call), search xét mọi log con (F5).
 - `groupKeyOf` / `buildGroup` / `groupText` throw → log hiển thị như log đơn, `debugPrint` lỗi.
 

@@ -1,3 +1,4 @@
+export 'console/talker_console_capture.dart';
 export 'grouping/talker_group_card.dart';
 export 'grouping/talker_log_grouper.dart';
 export 'extensions/extensions.dart';
